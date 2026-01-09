@@ -37,3 +37,4 @@ Thumbs.db
 
 # Packaging artifacts
 *.egg-info/*
+*.egg-info/
