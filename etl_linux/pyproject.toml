@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "etl_linux"
+version = "0.1.0"
+description = "ETL from TDC Linux exclusive"
+readme = "README.md"
+dependencies = ["pandas", "pytdc"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
