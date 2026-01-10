@@ -1,3 +1,5 @@
+from etl_linux.configs.configs_path import *
+
 # Single-instance Prediction ./Datasets
 absorption = [
     "Caco2_Wang",
@@ -48,3 +50,16 @@ admet_processes = {
     "Excretion": execretion,
     "Toxicity": toxicity,
 }
+
+
+# File names for each process
+admet_files = {
+    "Absorption": "admet_00_absorption.csv",
+    "Distribution": "admet_01_distribution.csv",
+    "Metabolism": "admet_02_metabolism.csv",
+    "Excretion": "admet_03_excretion.csv",
+    "Toxicity": "admet_04_toxicity.csv",
+}
+
+
+TOTAL_ENDPOINTS = sum(len(inner_arr) for inner_arr in admet_processes.values())
