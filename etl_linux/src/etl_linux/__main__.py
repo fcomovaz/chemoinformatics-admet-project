@@ -65,7 +65,8 @@ is_acquisition_necessary = False  # DON'T CHANGE
 try:
     # get the list from datasets
     files = os.listdir(DATASETS_DATA_DIR)
-    if set(files).issubset(set(admet_files.values())):
+    is_part_of = set(files).issubset(set(admet_files.values()))
+    if is_part_of and len(files) > 0:
         logger.info("Acquisition is not necessary.")
     else:
         logger.warning("Acquisition is necessary.")
@@ -137,3 +138,58 @@ if is_acquisition_necessary:
             logger.info(f"Processing completed. File '{file_name}' created.")
     except Exception as e:
         logger.error(f"Error processing files: {e}")
+
+
+# # -----------------------------------------------------------
+# # -----------------------------------------------------------
+# log_flow("Collapsing over duplicates with different values")
+# is_grouping_performed = False  # change to False to avoid grouping the variables
+# if is_grouping_performed:
+#     for admet_process in admet_processes:
+#         log_task(f"Grouping {admet_process}")
+#         try:
+#             file_name = admet_files[admet_process]
+#             df = pd.read_csv(DATASETS_DATA_DIR / file_name)
+#         except Exception as e:
+#             logger.error(f"Error reading file '{file_name}': {e}")
+
+#         try:
+#             # df = df.groupby("Drug").agg(lambda x: x.mode().iloc[0])
+#             df = df.groupby("Drug", as_index=False).mean()
+#             df.to_csv(DATASETS_DATA_DIR / file_name, index=False)
+#         except Exception as e:
+#             logger.error(f"Error grouping over duplicates: {e}")
+
+#         logger.info(f"Grouping completed. File {file_name} processed.")
+# else:
+#     logger.info("Grouping not performed.")
+
+
+# -----------------------------------------------------------
+# -----------------------------------------------------------
+log_flow("Creating the big dataset - Joint ADMET")
+big_df = None
+for idx, admet_process in enumerate(admet_processes):
+    log_task(f"Processing {admet_process} ({idx+1}/{len(admet_processes)})")
+
+    try:
+        file_name = admet_files[admet_process]
+        df = pd.read_csv(DATASETS_DATA_DIR / file_name)
+    except Exception as e:
+        logger.error(f"Error reading file '{file_name}': {e}")
+
+    # prefix columns with process name to avoid duplicates
+    df = df.rename(
+        columns={c: f"{admet_process}_{c}" if c != "Drug" else c for c in df.columns}
+    )
+
+    if big_df is None:
+        big_df = df
+    else:
+        big_df = pd.merge(big_df, df, on="Drug", how="outer")
+
+    logger.info(f"Processing completed. File '{file_name}' processed.")
+
+
+big_df.to_csv(DATASETS_DATA_DIR / "combined_admet.csv", index=False)
+log_flow(f"Combined DataFrame saved to '{DATASETS_DATA_DIR}/combined_admet.csv'")
