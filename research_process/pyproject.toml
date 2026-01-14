@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "research_process"
+version = "0.1.0"
+description = "All the code for the research process"
+readme = "README.md"
+dependencies = ["pandas", "rdkit", "matplotlib", "numpy", "bblean"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
