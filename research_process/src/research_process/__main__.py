@@ -10,6 +10,7 @@ if __name__ == "__main__":
     # perform_post_checks()
 
     # removing_duplicates()
-    # removing_non_valid_smiles()   
+    # removing_non_valid_smiles()
+    check_descriptors_availability()
 
     # perform_enrichment()

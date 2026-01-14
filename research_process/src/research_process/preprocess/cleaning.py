@@ -1,11 +1,10 @@
 from research_process.configs.configs_path import *
 from research_process.utils.pytdc_endpoints import *
-
+from research_process.utils.rdkit_descriptors import *
 from research_process.configs.configs_log import log_flow, log_task
 import logging
-
 import pandas as pd
-
+import numpy as np
 from rdkit import Chem
 
 logger = logging.getLogger(__name__)
@@ -100,3 +99,48 @@ def removing_non_valid_smiles() -> None:
     df.to_csv(DATASETS_DATA_DIR / "combined_admet_no_invalids.csv", index=False)
 
     logger.info("Non valid SMILES removed")
+
+
+def check_descriptors_availability() -> None:
+    df = pd.read_csv(DATASETS_DATA_DIR / "combined_admet_no_invalids.csv")
+    logger.info(f"Dataset size {df.shape[0]:,}")
+    # df = df.sample(frac=0.01, random_state=42).reset_index(drop=True)
+    mols = df["SMILES"].tolist()
+
+    logger.info("Checking descriptor availability")
+    proc_time = AVG_TIME * len(mols)
+    logger.warning(f"This process may take at least {proc_time:6.2f} seconds")
+    logger.warning(f"This process may take at least {proc_time / 60:6.2f} minutes")
+
+    descriptors = []
+    for i, m in enumerate(mols):
+        # print(f"Processed -> {i+1}/{len(mols)}")
+        m = Chem.MolFromSmiles(m)
+        if m is None:
+            logger.error(f"Invalid SMILES: {m}")
+            break
+
+        try:
+            descriptors.append({name: f(m) for name, f in ALL_DESCRIPTORS})
+        except Exception:
+            # Mol válida pero descriptor falló → NaN también
+            descriptors.append({name: np.nan for name, _ in ALL_DESCRIPTORS})
+            logger.error(f"Error computing descriptors: {m}")
+
+    mols = df["SMILES"].reset_index(drop=True)
+    df = pd.concat([mols, pd.DataFrame(descriptors)], axis=1)
+
+    logger.info("Getting molecules with invalid descriptors")
+
+    non_desc = df[df.isna().any(axis=1)]
+    yes_desc = df[~df.isna().any(axis=1)]
+
+    logger.info(f"Total molecules with invalid descriptors: {non_desc.shape[0]:,}")
+    logger.info(f"Total molecules with valid descriptors: {yes_desc.shape[0]:,}")
+
+    with open(PROCESSED_DATA_DIR / "invalid_descriptors_molecules.txt", "w") as f:
+        f.write("\n".join(non_desc["SMILES"].tolist()))
+
+    yes_desc.to_csv(DATASETS_DATA_DIR / "combined_admet_full_descrips.csv", index=False)
+
+    logger.info("Invalid descriptors removed")
