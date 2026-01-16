@@ -102,12 +102,24 @@ def removing_non_valid_smiles() -> None:
 
 
 def check_descriptors_availability() -> None:
+    """
+    Checks if all molecules have valid descriptors.
+
+    * Reads the combined_admet_no_invalids.csv file.
+    * Computes all descriptors for each molecule.
+    * Saves the molecules with valid descriptors to combined_admet_full_descrips.csv.
+    * Saves the molecules with invalid descriptors to invalid_descriptors_molecules.txt.
+
+    :param: None
+
+    :return: None
+    """
+    log_flow("Checking descriptors availability")
     df = pd.read_csv(DATASETS_DATA_DIR / "combined_admet_no_invalids.csv")
     logger.info(f"Dataset size {df.shape[0]:,}")
     # df = df.sample(frac=0.01, random_state=42).reset_index(drop=True)
     mols = df["SMILES"].tolist()
 
-    logger.info("Checking descriptor availability")
     proc_time = AVG_TIME * len(mols)
     logger.warning(f"This process may take at least {proc_time:6.2f} seconds")
     logger.warning(f"This process may take at least {proc_time / 60:6.2f} minutes")
@@ -144,3 +156,30 @@ def check_descriptors_availability() -> None:
     yes_desc.to_csv(DATASETS_DATA_DIR / "combined_admet_full_descrips.csv", index=False)
 
     logger.info("Invalid descriptors removed")
+
+
+def separate_final_molecules() -> None:
+    """
+    Separates the final molecules from the combined_admet_full_descrips.csv file.
+
+    * Reads the combined_admet_full_descrips.csv file.
+    * Resets the index of the SMILES column.
+    * Saves the SMILES column to final_mols.csv.
+
+    :param: None
+
+    :return: None
+    """
+
+    log_flow("Separating final molecules")
+
+    df = pd.read_csv(DATASETS_DATA_DIR / "combined_admet_full_descrips.csv")
+    logger.info(f"Dataset size {df.shape[0]:,}")
+
+    mols = df["SMILES"]
+
+    mols = mols.reset_index(drop=True)
+
+    mols.to_csv(PROCESSED_DATA_DIR / "molecules_smiles.csv", index=False)
+
+    logger.info("Final molecules separated")
