@@ -12,6 +12,6 @@ if __name__ == "__main__":
     # removing_duplicates()
     # removing_non_valid_smiles()
     # check_descriptors_availability()
-    separate_final_molecules()
+    # separate_final_molecules()
 
-    # perform_enrichment()
+    perform_enrichment()
