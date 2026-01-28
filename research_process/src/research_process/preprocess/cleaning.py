@@ -183,3 +183,29 @@ def separate_final_molecules() -> None:
     mols.to_csv(PROCESSED_DATA_DIR / "molecules_smiles.csv", index=False)
 
     logger.info("Final molecules separated")
+
+
+def create_incomplete_endpoints() -> None:
+    """
+    Creates a copy of the combined_admet_no_invalids.csv file.
+    Saves it to molecules_incomplete_endpoints.csv.
+
+    :param: None
+
+    :return: None
+    """
+    log_flow("Creating incomplete endpoints")
+
+    df = pd.read_csv(DATASETS_DATA_DIR / "combined_admet_no_invalids.csv")
+    logger.info(f"Dataset size {df.shape[0]:,}")
+
+    with open(PROCESSED_DATA_DIR / "invalid_descriptors_molecules.txt", "r") as f:
+        mols_to_remove = f.read().splitlines()
+
+    logger.info(f"Dropping {len(mols_to_remove):,} molecules with invalid descriptors")
+    df = df[~df["SMILES"].isin(mols_to_remove)]
+    logger.info(f"Dataset size {df.shape[0]:,}")
+
+    df.to_csv(PROCESSED_DATA_DIR / "molecules_incomplete_endpoints.csv", index=False)
+
+    logger.info("Incomplete endpoints created")
