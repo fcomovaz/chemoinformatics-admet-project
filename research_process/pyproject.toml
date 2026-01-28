@@ -7,7 +7,7 @@ name = "research_process"
 version = "0.1.0"
 description = "All the code for the research process"
 readme = "README.md"
-dependencies = ["pandas", "rdkit", "matplotlib", "numpy", "bblean"]
+dependencies = ["pandas", "rdkit", "matplotlib", "numpy", "bblean", "optuna"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
